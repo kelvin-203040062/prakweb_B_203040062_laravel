@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\PostController;
+use App\Models\Post;
 use Illuminate\Support\Facades\Route;
+
+use App\Models\Category;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,57 +35,27 @@ Route::get('/about', function () {
 
 
 
-Route::get('/blog', function () {
-    $blog_posts = [
-        [
-            "title" => "Judul Post Pertama",
-            "slug" => "judul-post-pertama",
-            "author" => "Kelvin Ardiansah",
-            "Body" => "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Itaque rerum nihil veritatis distinctio reiciendis reprehenderit debitis et accusamus magni incidunt, ad quisquam porro inventore pariatur magnam modi sapiente aliquam, alias nulla deserunt repellendus tempora? Dolorem, asperiores quasi rem sit consectetur tempora quae explicabo, similique fuga vero mollitia totam. Corrupti, dolorum vitae delectus maiores reprehenderit placeat perferendis rem perspiciatis quod aut optio impedit eius at minus. Explicabo blanditiis, iusto delectus officiis harum itaque exercitationem vero deserunt sapiente aperiam quis excepturi quaerat!"
-        ],
-        [
-            "title" => "Judul Post Kedua",
-            "slug" => "judul-post-kedua",
-            "author" => "Keblin",
-            "Body" => "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Itaque rerum nihil veritatis distinctio reiciendis reprehenderit debitis et accusamus magni incidunt, ad quisquam porro inventore pariatur magnam modi sapiente aliquam, alias nulla deserunt repellendus tempora? Dolorem, asperiores quasi rem sit consectetur tempora quae explicabo, similique fuga vero mollitia totam. Corrupti, dolorum vitae delectus maiores reprehenderit placeat perferendis rem perspiciatis quod aut optio impedit eius at minus. Explicabo blanditiis, iusto delectus officiis harum itaque exercitationem vero deserunt sapiente aperiam quis excepturi quaerat!"
-        ],
-    ];
-    
-    return view('posts', [
-        "title" => "Posts",
-        "posts" => $blog_posts
+Route::get('/blog',[PostController::class, 'index']);
+Route::get('/posts/{post:slug}', [PostController::class, 'show']);
+
+Route::get('/categories', function() {
+    return view('categories', [
+        'title' => 'Post Categories',
+        'categories' => category::all()
     ]);
 });
 
 
-// halaman single post//
-Route::get('posts/{slug}', function($slug) {
-    $blog_posts = [
-        [
-            "title" => "Judul Post Pertama",
-            "slug" => "judul-post-pertama",
-            "author" => "Kelvin Ardiansah",
-            "Body" => "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Itaque rerum nihil veritatis distinctio reiciendis reprehenderit debitis et accusamus magni incidunt, ad quisquam porro inventore pariatur magnam modi sapiente aliquam, alias nulla deserunt repellendus tempora? Dolorem, asperiores quasi rem sit consectetur tempora quae explicabo, similique fuga vero mollitia totam. Corrupti, dolorum vitae delectus maiores reprehenderit placeat perferendis rem perspiciatis quod aut optio impedit eius at minus. Explicabo blanditiis, iusto delectus officiis harum itaque exercitationem vero deserunt sapiente aperiam quis excepturi quaerat!"
-        ],
-        [
-            "title" => "Judul Post Kedua",
-            "slug" => "judul-post-kedua",
-            "author" => "Keblin",
-            "Body" => "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Itaque rerum nihil veritatis distinctio reiciendis reprehenderit debitis et accusamus magni incidunt, ad quisquam porro inventore pariatur magnam modi sapiente aliquam, alias nulla deserunt repellendus tempora? Dolorem, asperiores quasi rem sit consectetur tempora quae explicabo, similique fuga vero mollitia totam. Corrupti, dolorum vitae delectus maiores reprehenderit placeat perferendis rem perspiciatis quod aut optio impedit eius at minus. Explicabo blanditiis, iusto delectus officiis harum itaque exercitationem vero deserunt sapiente aperiam quis excepturi quaerat!"
-        ],
-    ];
+Route::get('/categories/{category:slug}', function(Category $category) {
+    return view('posts', [
+        'title' => "Post by Category : $category->name",
+        'posts' => $category->posts->load('category', 'author')
+    ]);
+});
 
-    $new_post = [];
-    foreach($blog_posts as $post) {
-        if($post["slug"]=== $slug) {
-            $new_post = $post;
-        }
-    }
-
-
-
-    return view('post', [
-        "title" => "Single post",
-        "post" => $new_post
+Route::get('/authors/{author:username}', function(User $author) {
+    return view('posts', [
+        'title' => "Post By Author : $author->name",
+        'posts' => $author->posts->load('category', 'author'),
     ]);
 });
